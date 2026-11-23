@@ -1,0 +1,36 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task --list
+    silent: true
+
+  db:up:
+    desc: Start the PostgreSQL container
+    cmds:
+      - docker compose up -d --wait db
+
+  db:down:
+    desc: Stop the PostgreSQL container without deleting its data
+    cmds:
+      - docker compose stop db
+
+  backend:
+    desc: Start the Spring Boot backend
+    deps: [db:up]
+    dir: backend
+    cmds:
+      - cmd.exe /c gradlew.bat bootRun
+
+  frontend:
+    desc: Start the React development server
+    dir: frontend
+    cmds:
+      - npm run dev
+
+  dev:
+    desc: Start the database, backend, and frontend
+    cmds:
+      - task db:up
+      - task --parallel backend frontend
